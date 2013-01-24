@@ -128,8 +128,8 @@ public class ArquillianSuiteExtension implements LoadableExtension {
         }
 
         private void executeInClassScope(Callable<Void> call) {
+            classContext.get().activate(deploymentClass);
             try {
-                classContext.get().activate(deploymentClass);
                 call.call();
             } catch (Exception e) {
                 throw new RuntimeException("Could not invoke operation", e);
