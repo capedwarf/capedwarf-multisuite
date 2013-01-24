@@ -50,7 +50,8 @@ public class DeploymentsTestCase extends BaseTest {
         ClassLoader cl = DeploymentsTestCase.class.getClassLoader();
 
         // Tests
-        List<TestItem> items = TestItemParser.parse(cl.getResourceAsStream("tests.txt"));
+        String file = System.getProperty("tests.file", "tests.txt");
+        List<TestItem> items = TestItemParser.parse(cl.getResourceAsStream(file));
         for (TestItem item : items) {
             if (TestItem.Type.CLASS == item.getType()) {
                 Class<?> clazz = cl.loadClass(item.getFqn());
