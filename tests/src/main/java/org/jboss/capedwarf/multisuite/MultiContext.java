@@ -22,39 +22,55 @@
 
 package org.jboss.capedwarf.multisuite;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.File;
+
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public final class TestItemParser {
-    private TestItemParser() {
+public class MultiContext {
+    private final WebArchive war;
+    private final File root;
+    private final ClassLoader classLoader;
+
+    public MultiContext(WebArchive war, File root, ClassLoader classLoader) {
+        this.war = war;
+        this.root = root;
+        this.classLoader = classLoader;
     }
 
-    public static List<TestItem> parse(InputStream stream) throws IOException {
-        if (stream == null)
-            return Collections.emptyList();
+    public void addClass(Class<?> current) {
+        if (current == null || current == Object.class)
+            return;
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        try {
-            List<TestItem> items = new ArrayList<TestItem>();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.length() == 0 || line.charAt(0) == '#')
-                    continue;
+        war.addClass(current);
 
-                String[] split = line.split("=");
-                items.add(new TestItem(TestItem.Type.valueOf(split[0].toUpperCase()), split[1].trim()));
-            }
-            return items;
-        } finally {
-            reader.close();
+        for (Class<?> iface : current.getInterfaces()) {
+            addClass(iface);
         }
+
+        addClass(current.getSuperclass());
+    }
+
+    public String getRelativePath(File current) {
+        String path = "";
+        while (current.equals(root) == false) {
+            path = "/" + current.getName() + path;
+            current = current.getParentFile();
+        }
+        return path.length() > 0 ? path.substring(1) : path;
+    }
+
+    public WebArchive getWar() {
+        return war;
+    }
+
+    public File getRoot() {
+        return root;
+    }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
     }
 }

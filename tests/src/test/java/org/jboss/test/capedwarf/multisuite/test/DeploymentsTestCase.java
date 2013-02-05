@@ -22,13 +22,14 @@
 
 package org.jboss.test.capedwarf.multisuite.test;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.File;
+import java.net.URL;
 
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.capedwarf.multisuite.TestItem;
-import org.jboss.capedwarf.multisuite.TestItemParser;
+import org.jboss.capedwarf.multisuite.MultiContext;
+import org.jboss.capedwarf.multisuite.MultiProvider;
+import org.jboss.capedwarf.multisuite.items.TestItemMultiProvider;
+import org.jboss.capedwarf.multisuite.scan.ScanMultiProvider;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.test.capedwarf.common.support.All;
 import org.jboss.test.capedwarf.common.test.BaseTest;
@@ -42,40 +43,22 @@ public class DeploymentsTestCase extends BaseTest {
     public static WebArchive getDeployment() throws Exception {
         TestContext context = new TestContext("capedwarf-multisuite");
         WebArchive war = getCapedwarfDeployment(context);
-        Set<Class<?>> classes = new HashSet<Class<?>>();
+        ClassLoader cl = DeploymentsTestCase.class.getClassLoader();
+        URL arqXml = cl.getResource("arquillian.xml");
+        if (arqXml == null) {
+            throw new IllegalArgumentException("No arquillian.xml?!");
+        }
+        File root = new File(arqXml.toURI()).getParentFile();
+
+        MultiContext mc = new MultiContext(war, root, cl);
 
         // Common
-        addClasses(classes, All.class);
+        mc.addClass(All.class);
 
-        ClassLoader cl = DeploymentsTestCase.class.getClassLoader();
-
-        // Tests
-        String file = System.getProperty("tests.file", "tests.txt");
-        List<TestItem> items = TestItemParser.parse(cl.getResourceAsStream(file));
-        for (TestItem item : items) {
-            if (TestItem.Type.CLASS == item.getType()) {
-                Class<?> clazz = cl.loadClass(item.getFqn());
-                addClasses(classes, clazz);
-            } else {
-                war.addPackage(item.getFqn());
-            }
-        }
-
-        war.addClasses(classes.toArray(new Class[classes.size()]));
+        MultiProvider provider = new TestItemMultiProvider();
+        //MultiProvider provider = new ScanMultiProvider();
+        provider.provide(mc);
 
         return war;
-    }
-
-    protected static void addClasses(Set<Class<?>> classes, Class<?> current) {
-        if (current == null || current == Object.class)
-            return;
-
-        classes.add(current);
-
-        for (Class<?> iface : current.getInterfaces()) {
-            addClasses(classes, iface);
-        }
-
-        addClasses(classes, current.getSuperclass());
     }
 }
