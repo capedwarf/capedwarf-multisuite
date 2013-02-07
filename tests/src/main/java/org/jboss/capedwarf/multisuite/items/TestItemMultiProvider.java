@@ -33,10 +33,9 @@ import org.jboss.capedwarf.multisuite.MultiProvider;
  */
 public class TestItemMultiProvider implements MultiProvider {
     public void provide(MultiContext context) throws Exception {
-        final ClassLoader cl = context.getClassLoader();
         // Tests
         String file = System.getProperty("tests.file", "tests.txt");
-        InputStream stream = cl.getResourceAsStream(file);
+        InputStream stream = context.getResourceAsStream(file);
         if (stream == null) {
             throw new IllegalArgumentException("No such file: " + file);
         }
@@ -44,8 +43,7 @@ public class TestItemMultiProvider implements MultiProvider {
         List<TestItem> items = TestItemParser.parse(stream);
         for (TestItem item : items) {
             if (TestItem.Type.CLASS == item.getType()) {
-                Class<?> clazz = cl.loadClass(item.getFqn());
-                context.addClass(clazz);
+                context.addClass(item.getFqn());
             } else {
                 context.getWar().addPackage(item.getFqn());
             }

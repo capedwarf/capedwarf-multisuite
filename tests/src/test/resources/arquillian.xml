@@ -27,7 +27,7 @@
     <defaultProtocol type="Servlet 2.5"/>
 
     <extension qualifier="suite">
-        <property name="deploymentClass">org.jboss.test.capedwarf.multisuite.test.DeploymentsTestCase</property>
+        <property name="deploymentClass">org.jboss.test.capedwarf.multisuite.test.MultiDeployment</property>
     </extension>
 
 </arquillian>

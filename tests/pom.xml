@@ -104,14 +104,7 @@
 
         <dependency>
             <groupId>org.jboss.capedwarf.blue</groupId>
-            <artifactId>capedwarf-quota</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.capedwarf.blue</groupId>
-            <artifactId>capedwarf-urlfetch</artifactId>
+            <artifactId>capedwarf-tasks</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -216,6 +209,13 @@
 
         <dependency>
             <groupId>org.jboss.capedwarf.blue</groupId>
+            <artifactId>capedwarf-quota</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss.capedwarf.blue</groupId>
             <artifactId>capedwarf-search</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
@@ -223,7 +223,7 @@
 
         <dependency>
             <groupId>org.jboss.capedwarf.blue</groupId>
-            <artifactId>capedwarf-tasks</artifactId>
+            <artifactId>capedwarf-urlfetch</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

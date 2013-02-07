@@ -28,22 +28,19 @@ import java.net.URL;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.capedwarf.multisuite.MultiContext;
 import org.jboss.capedwarf.multisuite.MultiProvider;
-import org.jboss.capedwarf.multisuite.items.TestItemMultiProvider;
 import org.jboss.capedwarf.multisuite.scan.ScanMultiProvider;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.test.capedwarf.common.support.All;
-import org.jboss.test.capedwarf.common.test.BaseTest;
-import org.jboss.test.capedwarf.common.test.TestContext;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
-public class DeploymentsTestCase extends BaseTest {
+public class MultiDeployment {
     @Deployment
     public static WebArchive getDeployment() throws Exception {
-        TestContext context = new TestContext("capedwarf-multisuite");
-        WebArchive war = getCapedwarfDeployment(context);
-        ClassLoader cl = DeploymentsTestCase.class.getClassLoader();
+        WebArchive war = ShrinkWrap.create(WebArchive.class, "capedwarf-tests.war");
+        ClassLoader cl = MultiDeployment.class.getClassLoader();
         URL arqXml = cl.getResource("arquillian.xml");
         if (arqXml == null) {
             throw new IllegalArgumentException("No arquillian.xml?!");
@@ -55,8 +52,7 @@ public class DeploymentsTestCase extends BaseTest {
         // Common
         mc.addClass(All.class);
 
-        MultiProvider provider = new TestItemMultiProvider();
-        //MultiProvider provider = new ScanMultiProvider();
+        MultiProvider provider = new ScanMultiProvider();
         provider.provide(mc);
 
         return war;

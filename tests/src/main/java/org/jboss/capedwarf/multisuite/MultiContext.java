@@ -23,6 +23,8 @@
 package org.jboss.capedwarf.multisuite;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 
@@ -38,6 +40,35 @@ public class MultiContext {
         this.war = war;
         this.root = root;
         this.classLoader = classLoader;
+    }
+
+    public Class<?> loadClass(String className) throws Exception {
+        return classLoader.loadClass(className);
+    }
+
+    public URL getResource(String resource) {
+        return classLoader.getResource(resource);
+    }
+
+    public InputStream getResourceAsStream(String resource) {
+        return classLoader.getResourceAsStream(resource);
+    }
+
+    public String toFQN(File classFile) {
+        if (classFile.getName().endsWith(".class") == false) {
+            throw new IllegalArgumentException("File is not Java class: " + classFile);
+        }
+        String relativePath = getRelativePath(classFile);
+        relativePath = relativePath.replace("/", ".");
+        return relativePath.substring(0, relativePath.length() - ".class".length());
+    }
+
+    public Class<?> toClass(File classFile) throws Exception {
+        return loadClass(toFQN(classFile));
+    }
+
+    public void addClass(String className) throws Exception {
+        addClass(loadClass(className));
     }
 
     public void addClass(Class<?> current) {

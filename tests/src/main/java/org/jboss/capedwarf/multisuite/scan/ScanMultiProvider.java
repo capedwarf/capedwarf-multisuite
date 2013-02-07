@@ -23,43 +23,65 @@
 package org.jboss.capedwarf.multisuite.scan;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
+import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.capedwarf.multisuite.MultiContext;
 import org.jboss.capedwarf.multisuite.MultiProvider;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
 
 /**
  * @author <a href="mailto:ales.justin@jboss.org">Ales Justin</a>
  */
 public class ScanMultiProvider implements MultiProvider {
     private final Pattern classPattern;
-    private final Pattern resourcePattern;
 
     public ScanMultiProvider() {
-        this("[.]*\\.class", "([.]*\\.xml)|([.]*\\.properties)");
+        this(".+TestCase\\.class");
     }
 
-    public ScanMultiProvider(String classRegexp, String resourceRegexp) {
+    public ScanMultiProvider(String classRegexp) {
         this.classPattern = Pattern.compile(classRegexp);
-        this.resourcePattern = Pattern.compile(resourceRegexp);
     }
 
     public void provide(MultiContext context) throws Exception {
         scan(context, context.getRoot());
     }
 
-    protected void scan(MultiContext context, File current) {
+    protected void scan(MultiContext context, File current) throws Exception {
         if (current.isFile()) {
             String name = current.getName();
             if (classPattern.matcher(name).matches()) {
-                context.getWar().addClass(context.getRelativePath(current).replace("/", "."));
-            } else if (resourcePattern.matcher(name).matches()) {
-                // TODO
+                Class<?> clazz = context.toClass(current);
+                context.addClass(clazz);
+                WebArchive war = readWebArchive(clazz, clazz);
+                merge(context, war);
             }
         } else {
             for (File file : current.listFiles()) {
                 scan(context, file);
             }
         }
+    }
+
+    protected void merge(MultiContext context, WebArchive war) {
+        WebArchive uber = context.getWar();
+        uber.merge(war);
+    }
+
+    protected WebArchive readWebArchive(Class<?> clazz, Class<?> current) throws Exception {
+        if (current == null || current == Object.class) {
+            throw new IllegalArgumentException("No @Deployment on test class: " + clazz.getName());
+        }
+
+        Method[] methods = current.getDeclaredMethods();
+        for (Method m : methods) {
+            if (m.isAnnotationPresent(Deployment.class)) {
+                return (WebArchive) m.invoke(null);
+            }
+        }
+
+        return readWebArchive(clazz, current.getSuperclass());
     }
 }
