@@ -78,6 +78,7 @@ public class ScanMultiProvider implements MultiProvider {
         Method[] methods = current.getDeclaredMethods();
         for (Method m : methods) {
             if (m.isAnnotationPresent(Deployment.class)) {
+                m.setAccessible(true); // in case of non-public
                 return (WebArchive) m.invoke(null);
             }
         }
