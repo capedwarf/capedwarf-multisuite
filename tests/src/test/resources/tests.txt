@@ -1,5 +1,5 @@
 # Classes
-class=org.jboss.test.capedwarf.quota.test.SimpleQuotaTestCase
-class=org.jboss.test.capedwarf.urlfetch.test.URLFetchTestCase
+class=org.jboss.test.capedwarf.quota.test.SimpleQuotaTest
+class=org.jboss.test.capedwarf.urlfetch.test.URLFetchTest
 
 # Packages

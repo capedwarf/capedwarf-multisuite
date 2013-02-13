@@ -38,7 +38,7 @@ public class ScanMultiProvider implements MultiProvider {
     private final Pattern classPattern;
 
     public ScanMultiProvider() {
-        this(".+TestCase\\.class");
+        this(".+Test\\.class");
     }
 
     public ScanMultiProvider(String classRegexp) {
